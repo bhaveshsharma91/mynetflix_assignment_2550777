@@ -1,17 +1,37 @@
-FROM node:16.17.0-alpine as builder
-WORKDIR /app
-COPY ./package.json .
-COPY ./yarn.lock .
-RUN yarn install
-COPY . .
-ARG TMDB_V3_API_KEY
-ENV VITE_APP_TMDB_V3_API_KEY=${TMDB_V3_API_KEY}
-ENV VITE_APP_API_ENDPOINT_URL="https://api.themoviedb.org/3"
-RUN yarn build
+# FROM node:14.17.5
 
-FROM nginx:stable-alpine
-WORKDIR /usr/share/nginx/html
-RUN rm -rf ./*
-COPY --from=builder /app/dist .
-EXPOSE 80
-ENTRYPOINT ["nginx", "-g", "daemon off;"]
+# WORKDIR /usr/src/app
+
+# COPY package*.json ./
+
+# RUN npm install
+
+# COPY . .
+
+# EXPOSE 3000
+
+# CMD ["npm", "run", "start"]
+
+# Use the official Node.js 16 image as the base image
+FROM node:16-alpine
+
+# Set the working directory inside the container
+WORKDIR /usr/src/app
+
+# Copy package.json and package-lock.json to the container
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy the entire source code to the container
+COPY . .
+
+# Build the Next.js app
+RUN npm run build
+
+# Expose the port your app will run on
+EXPOSE 3000
+
+# Define the command to start the app
+CMD ["npm", "run", "start"]
